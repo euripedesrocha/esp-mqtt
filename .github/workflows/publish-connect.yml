@@ -52,7 +52,6 @@ jobs:
                       ${{steps.build.outputs.artifacts_path}}/build_*/*.bin
                       ${{steps.build.outputs.artifacts_path}}/build_*/flasher_args.json
                       ${{steps.build.outputs.artifacts_path}}/build_*/config/sdkconfig.json
-                      ${{steps.build.outputs.artifacts_path}}/*.py
                   if-no-files-found: error
 
     run-on-target:
@@ -107,16 +106,23 @@ jobs:
               run: |
                   curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
                   apt-get install -y nodejs
+            - name: Install Python packages
+              shell: bash
+              env:
+                  PIP_EXTRA_INDEX_URL: "https://dl.espressif.com/pypi/"
+              run: pip install --prefer-binary paho-mqtt
             - uses: actions/checkout@v4
             - name: Download artifacts
               uses: actions/download-artifact@v4
               id: artifacts
               with:
                   name: mqtt_bin_${{env.target}}_${{ env.idf_version }}_${{ env.app_name }}
-                  path: test
+                  path: test/publish_connect_test
             - name: Check artifacts
               shell: bash
-              run: ls test/
+              run: |
+                  ls
+                  ls test/publish_connect_test
             # - name: Checkout IDF ${{inputs.idf_version}}
             #   uses: actions/checkout@v4
             #   with:
@@ -139,4 +145,4 @@ jobs:
               with:
                   target: esp32
                   app_name: publish_connnect_test
-                  app_path: test
+                  app_path: test/publish_connect_test
